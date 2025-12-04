@@ -11,7 +11,7 @@ export class Translator {
 
   // Maximum length of text segment for the Google Translate API (approximate safe limit)
   // We keep this limit high, but the segmentation logic will try to break it sooner at sentence ends.
-  private readonly MAX_SEGMENT_LENGTH: number = 4500
+  private readonly MAX_SEGMENT_LENGTH: number = 1000
 
   /**
    * Internal method to directly call the Google Translate API.
@@ -21,7 +21,7 @@ export class Translator {
     sourceLang: string,
     targetLang: string
   ): Promise<string> {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&dt=at&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(
       text
     )}`
 

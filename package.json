@@ -10,6 +10,7 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "jieba-wasm": "^2.4.0",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -28,10 +29,30 @@
       "https://*/*"
     ],
     "web_accessible_resources": [
-    {
-      "resources": ["assets/history-hook.js"], 
-      "matches": ["<all_urls>"]
+      {
+        "resources": [
+          "assets/history-hook.js"
+        ],
+        "matches": [
+          "<all_urls>"
+        ]
+      },
+      {
+        "resources": [
+          "assets/jieba/jieba_rs_wasm_bg.wasm",
+          "assets/jieba/jieba_rs_wasm.js"
+        ],
+        "matches": [
+          "<all_urls>"
+        ]
+      }
+    ],
+    "background": {
+      "service_worker": "background.js",
+      "type": "module"
+    },
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
     }
-  ]
   }
 }
