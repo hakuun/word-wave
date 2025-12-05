@@ -1,9 +1,25 @@
-import { TextMonitor, Translator } from "~lib"
-import { getWords, injectScript } from "~utils"
+import { Storage } from "@plasmohq/storage"
 
+import { CEFR_LEVELS } from "~constants"
+import { OpenAICaller, TextMonitor, Translator } from "~lib"
+import { getUserConfig, getWords, injectScript } from "~utils"
+
+function getTranslateUserPrompt({
+  CEFR,
+  text
+}: {
+  CEFR: string
+  text: string
+}) {
+  const currentIndex = CEFR_LEVELS.findIndex((level) => level === CEFR)
+  const targetPlus = CEFR_LEVELS[currentIndex + 1]
+  return `Please read the following Chinese text and perform appropriate word segmentation. For each term, provide an English translation, its CEFR level in English, and a concise but helpful detailed explanation. Only return terms that meet the target CEFR level ${CEFR} and ${CEFR}+1 (i.e., ${targetPlus}). Output as a strict JSON array, without adding any descriptions or extraneous text. Each object in the array should contain the following fields: original text, translation, CEFR level, and detailed explanation. Chinese:${text}`
+}
 // Set its source to the injected script file (e.g., history-hook.js)
 injectScript("assets/history-hook.js") // Add it to the DOM to execute it immediately
+
 const translator = new Translator()
+let caller: OpenAICaller
 
 //  Define the callback function ---
 async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
@@ -19,9 +35,16 @@ async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
   console.log(
     `Real-time update: ${noTranslatedElements?.length} text elements are need translate.`
   )
+  const userConfig = await getUserConfig()
   for (let i = 0; i < noTranslatedElements.length; i++) {
     const element = noTranslatedElements[i]
     const text = element.textContent || ""
+    const translateUserPrompt = getTranslateUserPrompt({
+      CEFR: userConfig.CEFR,
+      text
+    })
+    const response = await caller.call(translateUserPrompt)
+    console.log(response)
     // console.log("text:", text)
     // const words = await getWords(text)
     // console.log("words:", words)
@@ -43,7 +66,7 @@ async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
   }
 }
 
-function main() {
+async function main() {
   try {
     //  Instantiate the monitor ---
     const monitor = new TextMonitor(handleVisibleElementsUpdate)
@@ -56,6 +79,14 @@ function main() {
       // reset the monitor when route change
       monitor.reset()
     })
+
+    const userConfig = await getUserConfig()
+    const OpenAIConfig = {
+      ...userConfig,
+      systemPrompt: "You are a professional language learning assistant"
+    }
+
+    caller = new OpenAICaller(OpenAIConfig)
   } catch (error) {
     console.error("Error in main:", error)
   }

@@ -1,24 +1,28 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+import { Storage } from "@plasmohq/storage"
+
+import { CEFR_LEVELS } from "~constants"
+import type { UserConfig } from "~types"
 
 function IndexPopup() {
-  const [data, setData] = useState("")
+  const storage = new Storage()
+  const [config, setConfig] = useState<UserConfig>({
+    CEFR: CEFR_LEVELS[1]
+  })
+
+  useEffect(() => {
+    storage.get<UserConfig>("userConfig").then((config) => {
+      setConfig(config)
+    })
+  }, [])
 
   return (
     <div
       style={{
         padding: 16
       }}>
-      <h2>
-        Welcome to your{" "}
-        <a href="https://www.plasmo.com" target="_blank">
-          Plasmo
-        </a>{" "}
-        Extension!
-      </h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-      <a href="https://docs.plasmo.com" target="_blank">
-        View Docs
-      </a>
+      CEFR:{config.CEFR}
     </div>
   )
 }
