@@ -55,3 +55,22 @@ export function getLongestSentences(tokens: Token[]): Token[] {
 
   return result
 }
+
+
+export async function getWords(text: string) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(
+      {
+        action: "segment_text",
+        text: text
+      },
+      (response) => {
+        if (response && response.words) {
+          resolve(response.words)
+        } else {
+          reject(new Error("Failed to get words"))
+        }
+      }
+    )
+  })
+}

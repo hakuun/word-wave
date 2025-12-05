@@ -1,28 +1,9 @@
-import { TextMonitor, TokenClassify, Translator } from "~lib"
-import { injectScript } from "~utils"
+import { TextMonitor, Translator } from "~lib"
+import { getWords, injectScript } from "~utils"
 
 // Set its source to the injected script file (e.g., history-hook.js)
 injectScript("assets/history-hook.js") // Add it to the DOM to execute it immediately
 const translator = new Translator()
-const tokenClassify = new TokenClassify()
-
-async function getWords(text: string) {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
-      {
-        action: "segment_text",
-        text: text
-      },
-      (response) => {
-        if (response && response.words) {
-          resolve(response.words)
-        } else {
-          reject(new Error("Failed to get words"))
-        }
-      }
-    )
-  })
-}
 
 //  Define the callback function ---
 async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
@@ -41,9 +22,9 @@ async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
   for (let i = 0; i < noTranslatedElements.length; i++) {
     const element = noTranslatedElements[i]
     const text = element.textContent || ""
-    console.log("text:", text)
-    const words = await getWords(text)
-    console.log("words:", words)
+    // console.log("text:", text)
+    // const words = await getWords(text)
+    // console.log("words:", words)
 
     // const translatedText = await translator.translate(element.textContent || "")
     // console.log(translatedText)
