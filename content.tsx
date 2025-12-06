@@ -1,8 +1,9 @@
-import { Storage } from "@plasmohq/storage"
+import { sendToBackground } from "@plasmohq/messaging"
 
 import { CEFR_LEVELS } from "~constants"
-import { OpenAICaller, TextMonitor, Translator } from "~lib"
-import { getUserConfig, getWords, injectScript } from "~utils"
+import { TRANSLATE_AND_ANALYSIS } from "~constants/business"
+import { TextMonitor } from "~lib"
+import { getUserConfig, injectScript } from "~utils"
 
 function getTranslateUserPrompt({
   CEFR,
@@ -17,9 +18,6 @@ function getTranslateUserPrompt({
 }
 // Set its source to the injected script file (e.g., history-hook.js)
 injectScript("assets/history-hook.js") // Add it to the DOM to execute it immediately
-
-const translator = new Translator()
-let caller: OpenAICaller
 
 //  Define the callback function ---
 async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
@@ -39,13 +37,13 @@ async function handleVisibleElementsUpdate(elements: HTMLElement[]) {
   for (let i = 0; i < noTranslatedElements.length; i++) {
     const element = noTranslatedElements[i]
     const text = element.textContent || ""
-    const translateUserPrompt = getTranslateUserPrompt({
-      CEFR: userConfig.CEFR,
-      text
+
+    const resp = await sendToBackground({
+      name: TRANSLATE_AND_ANALYSIS,
+      body: { text }
     })
-    const response = await caller.call(translateUserPrompt)
-    console.log(response)
-    // console.log("text:", text)
+
+    console.log("resp:", resp)
     // const words = await getWords(text)
     // console.log("words:", words)
 
@@ -79,14 +77,6 @@ async function main() {
       // reset the monitor when route change
       monitor.reset()
     })
-
-    const userConfig = await getUserConfig()
-    const OpenAIConfig = {
-      ...userConfig,
-      systemPrompt: "You are a professional language learning assistant"
-    }
-
-    caller = new OpenAICaller(OpenAIConfig)
   } catch (error) {
     console.error("Error in main:", error)
   }

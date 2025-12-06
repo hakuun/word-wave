@@ -14,4 +14,5 @@ export interface IOpenAICallerConfig {
 
 export interface UserConfig extends IOpenAICallerConfig {
   CEFR: string
+  modelCompany: string
 }

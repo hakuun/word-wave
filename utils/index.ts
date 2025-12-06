@@ -1,5 +1,6 @@
 import { Storage } from "@plasmohq/storage"
 
+import { DEFAULT_CONFIG, USER_CONFIG_KEY } from "~constants"
 import type { UserConfig } from "~types"
 
 const storage = new Storage()
@@ -47,5 +48,5 @@ export async function getWords(text: string) {
 }
 
 export async function getUserConfig(): Promise<UserConfig> {
-  return await storage.get("userConfig")
+  return (await storage.get(USER_CONFIG_KEY)) || DEFAULT_CONFIG
 }
