@@ -1,6 +1,6 @@
 import type { UserConfig } from "~types"
 
-import { MAJOR_LLM_PROVIDERS } from "./LLMProvider"
+import { MAJOR_LLM_PROVIDERS } from "./provider"
 
 export const USER_CONFIG_KEY = "USER_CONFIG_KEY"
 
